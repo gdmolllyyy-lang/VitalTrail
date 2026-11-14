@@ -1,0 +1,17 @@
+{
+  "name": "healthy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Healthy · 健身饮食管家：饮食/运动记录、代谢与热量差计算、食谱与一周计划、动作库（前端 + Node 后端 + SQLite）",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node --experimental-sqlite --no-warnings server/app.js",
+    "dev": "node --experimental-sqlite --no-warnings server/app.js",
+    "check": "node --check server/app.js && node --check server/api.js && node --check server/db.js && node --check public/js/app.js"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "keywords": ["fitness", "nutrition", "sqlite", "nodejs", "rest-api"],
+  "license": "MIT"
+}

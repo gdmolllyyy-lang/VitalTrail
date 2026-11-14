@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#12b886" />
+<title>Healthy · 健身饮食管家</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%2312b886'/%3E%3Ccircle cx='32' cy='32' r='14' fill='none' stroke='white' stroke-width='7' stroke-dasharray='66 22' stroke-linecap='round' transform='rotate(-90 32 32)'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="phone">
+
+  <!-- ===== 顶部 ===== -->
+  <header class="topbar">
+    <div class="topbar-row">
+      <div class="brand">
+        <div class="brand-mark">H</div>
+        <div>
+          <div class="brand-name">Healthy<span class="sync-dot" id="syncDot" title="数据同步状态"></span></div>
+          <div class="brand-sub">训练 · 饮食 · 数据</div>
+        </div>
+      </div>
+      <div class="top-date">
+        <b id="topDay">11月14日</b>
+        <span id="topWeek">周六</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="scroll" id="scroll">
+
+    <!-- ================= 今日 ================= -->
+    <section class="view active" id="view-today">
+      <div class="hero">
+        <div class="hero-top">
+          <div class="ring-wrap">
+            <svg width="118" height="118" viewBox="0 0 118 118">
+              <circle class="ring-bg" cx="59" cy="59" r="50"></circle>
+              <circle class="ring-fg" id="ring" cx="59" cy="59" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16"></circle>
+            </svg>
+            <div class="ring-text">
+              <div>
+                <em id="ringKcal">0</em>
+                <span>已摄入 kcal</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-line"><span>目标摄入</span><b id="hTarget">—</b></div>
+            <div class="hero-line"><span>今日剩余</span><b id="hLeft">—</b></div>
+            <div class="hero-line"><span>运动消耗</span><b id="hBurn">—</b></div>
+          </div>
+        </div>
+        <div class="hero-verdict" id="hVerdict"><i>💡</i><span>完善身体数据后开始记录吧</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">代谢与消耗 <small>BMR / TDEE</small></div>
+          <button class="link" data-goto="me">身体数据 ›</button>
+        </div>
+        <div class="stat-grid">
+          <div class="stat"><em id="sBmr">—</em><span>基础代谢</span></div>
+          <div class="stat"><em id="sTdee">—</em><span>日常总消耗</span></div>
+          <div class="stat"><em id="sBal">—</em><span>热量差</span></div>
+        </div>
+        <p class="hint" id="bmrHint">基础代谢按 Mifflin-St Jeor 公式计算；填写体脂率后自动切换为 Katch-McArdle。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">三大营养素</div>
+          <span class="link" id="macroKcal">—</span>
+        </div>
+        <div class="macro">
+          <div class="macro-row"><b>蛋白质</b><span id="mP">0 / 0 g</span></div>
+          <div class="bar p"><i id="mPbar" style="width:0"></i></div>
+        </div>
+        <div class="macro">
+          <div class="macro-row"><b>脂肪</b><span id="mF">0 / 0 g</span></div>
+          <div class="bar f"><i id="mFbar" style="width:0"></i></div>
+        </div>
+        <div class="macro">
+          <div class="macro-row"><b>碳水</b><span id="mC">0 / 0 g</span></div>
+          <div class="bar c"><i id="mCbar" style="width:0"></i></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">今日饮食</div>
+          <button class="link" data-goto="log">去记录 ›</button>
+        </div>
+        <div id="todayMeals"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">今日运动</div>
+          <button class="link" id="quickAddExercise">+ 记运动</button>
+        </div>
+        <div id="todayExercise"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">今日推荐食谱</div>
+          <button class="link" data-goto="plan">完整食谱 ›</button>
+        </div>
+        <div id="todayPlanMini"></div>
+      </div>
+    </section>
+
+    <!-- ================= 记录 ================= -->
+    <section class="view" id="view-log">
+      <div class="card" style="padding:12px 14px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <button class="btn btn-ghost btn-sm" id="dayPrev">‹ 前一天</button>
+          <div style="text-align:center">
+            <div style="font-size:13.5px;font-weight:700" id="logDateLabel">今天</div>
+            <div style="font-size:11px;color:var(--sub)" id="logDateSub">—</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" id="dayNext">后一天 ›</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">饮食记录</div><span class="link" id="logKcal">0 kcal</span></div>
+        <div id="logMeals"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">运动记录</div><span class="link" id="logBurn">0 kcal</span></div>
+        <div id="logExercise"></div>
+        <button class="btn btn-outline btn-block btn-sm" style="margin-top:10px" id="addExerciseBtn">+ 添加运动</button>
+      </div>
+
+      <div class="note"><i>📝</i><span>记录越完整，热量差评估越准。食物热量按可食部计算，烹饪油建议单独记 1 勺（约 10g / 90 kcal）。</span></div>
+    </section>
+
+    <!-- ================= 食谱 ================= -->
+    <section class="view" id="view-plan">
+      <div class="segmented" id="planSeg">
+        <button class="on" data-tab="day">今日食谱</button>
+        <button data-tab="week">一周计划</button>
+      </div>
+
+      <div id="planDay">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">今日食谱 <small id="planTargetSub"></small></div>
+          </div>
+          <div id="planBody"></div>
+          <div class="btn-row" style="margin-top:14px">
+            <button class="btn btn-ghost btn-sm" id="regenPlan">换一份</button>
+            <button class="btn btn-primary btn-sm" id="applyPlan">记入今日饮食</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">定制条件</div></div>
+          <div class="field">
+            <label>目标</label>
+            <div class="chips" id="planGoalChips"></div>
+          </div>
+          <div class="field">
+            <label>饮食结构</label>
+            <div class="chips" id="planDietChips"></div>
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>忌口（可多选，生成食谱时会避开）</label>
+            <div class="chips" id="planAvoidChips"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="planWeek" style="display:none">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">未来一周 <small>训练 + 饮食</small></div>
+            <button class="link" id="regenWeek">重新生成 ›</button>
+          </div>
+          <div id="weekBody"></div>
+        </div>
+        <div class="note"><i>🗓️</i><span>一周计划依据你的目标、训练频率与忌口生成：训练日碳水与热量略高，休息日适度下调；每个训练日已按分化安排好动作。</span></div>
+      </div>
+    </section>
+
+    <!-- ================= 动作库 ================= -->
+    <section class="view" id="view-moves">
+      <div class="card" style="padding:14px">
+        <div class="input-row">
+          <div class="field">
+            <input class="input" id="moveSearch" placeholder="搜索动作，如 高位下拉 / 划船" />
+          </div>
+        </div>
+        <div class="chips" id="movePartChips" style="margin-top:4px"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">推荐给你 <small id="moveReason"></small></div>
+        </div>
+        <div id="moveList"></div>
+      </div>
+      <div class="note"><i>🏋️</i><span>动作要点参考 ACSM / NSCA 抗阻训练规范。新手先用小重量掌握动作模式，每个动作最后 2 次应"吃力但姿势不变形"。</span></div>
+    </section>
+
+    <!-- ================= 我的 ================= -->
+    <section class="view" id="view-me">
+      <div class="card">
+        <div class="card-head"><div class="card-title">身体数据</div><span class="link" id="saveProfile">保存</span></div>
+        <div class="input-row">
+          <div class="field"><label>性别</label>
+            <select class="input" id="pSex"><option value="female">女</option><option value="male">男</option></select>
+          </div>
+          <div class="field"><label>年龄</label><input class="input" id="pAge" type="number" inputmode="numeric" /></div>
+        </div>
+        <div class="input-row" style="margin-top:10px">
+          <div class="field"><label>身高 cm</label><input class="input" id="pHeight" type="number" inputmode="decimal" /></div>
+          <div class="field"><label>体重 kg</label><input class="input" id="pWeight" type="number" inputmode="decimal" /></div>
+        </div>
+        <div class="input-row" style="margin-top:10px">
+          <div class="field"><label>体脂率 %（选填）</label><input class="input" id="pBodyfat" type="number" inputmode="decimal" placeholder="如 22" /></div>
+          <div class="field"><label>活动水平</label><select class="input" id="pActivity"></select></div>
+        </div>
+        <p class="hint">活动水平请选择<b>不含刻意训练</b>的日常状态，训练消耗在「运动记录」里单独计入，避免重复计算。</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">目标与偏好</div></div>
+        <div class="field"><label>当前目标</label><div class="chips" id="goalChips"></div></div>
+        <div class="field"><label>每周训练天数</label><div class="chips" id="freqChips"></div></div>
+        <div class="field" style="margin-bottom:0"><label>饮食结构</label><div class="chips" id="dietChips"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">代谢拆解</div></div>
+        <div class="stat-grid">
+          <div class="stat"><em id="mBmr">—</em><span>基础代谢</span></div>
+          <div class="stat"><em id="mTdee">—</em><span>总消耗</span></div>
+          <div class="stat"><em id="mTarget">—</em><span>目标摄入</span></div>
+        </div>
+        <div id="macroPlan" style="margin-top:14px"></div>
+        <p class="hint" id="formulaHint">—</p>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">体重 / 体脂趋势</div>
+          <button class="link" id="addWeightBtn">+ 记录</button>
+        </div>
+        <div id="weightChart"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><div class="card-title">数据来源</div></div>
+        <ul style="font-size:11.5px;color:var(--sub);line-height:1.75" id="sourceList"></ul>
+        <p class="hint">所有数值为参考估算，不构成医疗或营养处方建议。如有慢性疾病、孕期或进食障碍史，请咨询注册营养师 / 医生。</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== 底部导航 ===== -->
+  <nav class="tabbar" id="tabbar">
+    <button class="on" data-view="today">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.8V20h14V9.8"/><path d="M9.5 20v-5.5h5V20"/></svg>
+      <span>今日</span>
+    </button>
+    <button data-view="log">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="16" rx="3"/><path d="M8 3v3M16 3v3M3.5 9.5h17"/><path d="M8 14h4"/></svg>
+      <span>记录</span>
+    </button>
+    <button data-view="plan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3v8a3 3 0 0 0 6 0V3"/><path d="M9 11v10"/><path d="M17 3c-1.6 1.4-2.4 3.2-2.4 5.4 0 1.8.8 3 2.4 3.4V21"/></svg>
+      <span>食谱</span>
+    </button>
+    <button data-view="moves">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6M20 9v6"/><path d="M7 7v10M17 7v10"/><path d="M7 12h10"/></svg>
+      <span>动作</span>
+    </button>
+    <button data-view="me">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.5c.8-3.7 3.8-5.8 7.5-5.8s6.7 2.1 7.5 5.8"/></svg>
+      <span>我的</span>
+    </button>
+  </nav>
+</div>
+
+<!-- ===== 弹层：添加饮食 ===== -->
+<div class="sheet-mask" id="mask"></div>
+
+<div class="sheet" id="sheet-food">
+  <div class="sheet-head">
+    <h3 id="foodSheetTitle">添加早餐</h3>
+    <button class="sheet-close" data-close>关闭</button>
+  </div>
+  <div class="sheet-body">
+    <div class="segmented" id="foodMode">
+      <button class="on" data-mode="text">文字 / 语音描述</button>
+      <button data-mode="photo">拍照记录</button>
+      <button data-mode="search">食物库</button>
+    </div>
+
+    <!-- 文字 -->
+    <div id="modeText">
+      <div class="field">
+        <label>用一句话描述你吃了什么</label>
+        <textarea class="input" id="foodText" placeholder="例：两个鸡蛋、一杯牛奶、一碗米饭、清炒西兰花150g"></textarea>
+        <p class="hint">支持"2个鸡蛋 / 150g鸡胸肉 / 一碗米饭 / 半份炒饭"，会自动匹配食物成分库并换算热量。</p>
+      </div>
+      <button class="btn btn-primary btn-block btn-sm" id="parseTextBtn">解析热量</button>
+      <div id="parseResult" style="margin-top:12px"></div>
+    </div>
+
+    <!-- 拍照 -->
+    <div id="modePhoto" style="display:none">
+      <input type="file" accept="image/*" capture="environment" id="photoInput" class="sr" />
+      <div id="photoBox">
+        <label class="photo-drop" for="photoInput" style="display:block">
+          <div class="ph-ico">📷</div>
+          <p>拍一张 / 从相册选择</p>
+          <p style="font-size:11px;opacity:.75">照片会压缩后保存在本地，作为饮食留档</p>
+        </label>
+      </div>
+      <div class="field" style="margin-top:12px">
+        <label>补充描述，用于计算热量</label>
+        <textarea class="input" id="photoText" placeholder="例：鸡胸肉一块、糙米饭半碗、水煮西兰花一份"></textarea>
+      </div>
+      <button class="btn btn-primary btn-block btn-sm" id="parsePhotoBtn">按描述计算热量</button>
+      <div id="photoResult" style="margin-top:12px"></div>
+      <p class="hint">说明：目前热量由食物成分库按文字描述换算；照片用于留档与回看。若要"看图直接算热量"，需要接入云端视觉模型。</p>
+    </div>
+
+    <!-- 搜索 -->
+    <div id="modeSearch" style="display:none">
+      <input class="input" id="foodSearch" placeholder="搜索食物名称，如 鸡胸肉" />
+      <div class="suggest" id="foodSearchList"></div>
+      <div class="field" style="margin-top:12px">
+        <label>份量（克）</label>
+        <input class="input" id="searchGrams" type="number" inputmode="numeric" placeholder="默认按常用份量" />
+      </div>
+    </div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn btn-primary btn-block" id="confirmFood">加入记录</button>
+  </div>
+</div>
+
+<!-- ===== 弹层：添加运动 ===== -->
+<div class="sheet" id="sheet-exercise">
+  <div class="sheet-head">
+    <h3>记录运动</h3>
+    <button class="sheet-close" data-close>关闭</button>
+  </div>
+  <div class="sheet-body">
+    <div class="field">
+      <label>选择运动</label>
+      <input class="input" id="exSearch" placeholder="搜索，如 慢跑 / 高位下拉" />
+      <div class="suggest" id="exSearchList"></div>
+    </div>
+    <div class="input-row">
+      <div class="field"><label>时长（分钟）</label><input class="input" id="exMin" type="number" inputmode="numeric" value="30" /></div>
+      <div class="field"><label>强度</label>
+        <select class="input" id="exIntensity">
+          <option value="0.85">轻松</option>
+          <option value="1" selected>标准</option>
+          <option value="1.2">高强度</option>
+        </select>
+      </div>
+    </div>
+    <div class="note ok" style="margin-top:12px"><i>🔥</i><span id="exEstimate">选择动作后显示预计消耗</span></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn btn-primary btn-block" id="confirmExercise">加入记录</button>
+  </div>
+</div>
+
+<!-- ===== 弹层：动作详情 ===== -->
+<div class="sheet" id="sheet-move">
+  <div class="sheet-head">
+    <h3 id="mvTitle">动作</h3>
+    <button class="sheet-close" data-close>关闭</button>
+  </div>
+  <div class="sheet-body" id="mvBody"></div>
+</div>
+
+<!-- ===== 弹层：记录体重 ===== -->
+<div class="sheet" id="sheet-weight">
+  <div class="sheet-head">
+    <h3>记录体重 / 体脂</h3>
+    <button class="sheet-close" data-close>关闭</button>
+  </div>
+  <div class="sheet-body">
+    <div class="input-row">
+      <div class="field"><label>体重 kg</label><input class="input" id="wWeight" type="number" inputmode="decimal" /></div>
+      <div class="field"><label>体脂率 %（选填）</label><input class="input" id="wBodyfat" type="number" inputmode="decimal" /></div>
+    </div>
+    <p class="hint">建议固定时间测量：晨起排尿后、空腹、穿同样衣物，数据更可比。</p>
+    <div id="weightHistory" style="margin-top:14px"></div>
+  </div>
+  <div class="sheet-foot">
+    <button class="btn btn-primary btn-block" id="confirmWeight">保存记录</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="../shared/dataset.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
