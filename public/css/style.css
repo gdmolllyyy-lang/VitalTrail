@@ -50,19 +50,6 @@ h1, h2, h3, h4, p { margin: 0; }
   position: relative;
   overflow-x: hidden;
 }
-@media (min-width: 860px) {
-  body { padding: 24px 0 40px; }
-  .phone {
-    min-height: auto;
-    height: calc(100vh - 64px);
-    border-radius: 28px;
-    box-shadow: 0 24px 60px -20px rgba(16, 24, 40, .28), 0 0 0 1px rgba(16, 24, 40, .06);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-  }
-  .scroll { max-height: calc(100vh - 64px - var(--nav-h)); }
-}
 
 
 /* ---------- 后端同步状态点 ---------- */
@@ -82,7 +69,6 @@ h1, h2, h3, h4, p { margin: 0; }
   background: linear-gradient(180deg, #ffffff 0%, #ffffff 70%, rgba(255, 255, 255, .92) 100%);
   border-bottom: 1px solid var(--line);
 }
-@media (min-width: 860px) { .topbar { position: relative; } }
 .topbar-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .brand { display: flex; align-items: center; gap: 8px; }
 .brand-mark {
@@ -98,7 +84,6 @@ h1, h2, h3, h4, p { margin: 0; }
 
 /* ---------- 滚动区 ---------- */
 .scroll { padding: 14px 14px calc(var(--nav-h) + 22px); }
-@media (min-width: 860px) { .scroll { overflow-y: auto; flex: 1; } }
 
 .view { display: none; animation: fade .22s ease; }
 .view.active { display: block; }
@@ -257,7 +242,6 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; min-height:
   display: flex; z-index: 40;
   padding-bottom: env(safe-area-inset-bottom);
 }
-@media (min-width: 860px) { .tabbar { position: absolute; left: 0; transform: none; width: 100%; } }
 .tabbar button {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   color: #9aa6b8; font-size: 10.5px; font-weight: 500; transition: color .15s;
@@ -417,3 +401,54 @@ textarea.input { height: auto; padding: 10px 12px; resize: vertical; min-height:
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
 
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---------- 平板 640-1023：加宽单列 ---------- */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .phone { max-width: 720px; }
+  .tabbar { max-width: 720px; }
+  .scroll { padding: 16px 20px calc(var(--nav-h) + 24px); }
+  .sheet { max-width: 560px; }
+}
+
+/* ---------- 桌面 ≥1024：仪表盘布局 ---------- */
+@media (min-width: 1024px) {
+  body { padding: 0; }
+  .phone {
+    max-width: none; width: 100%;
+    min-height: 100vh; height: 100vh;
+    border-radius: 0; box-shadow: none;
+    display: flex; flex-direction: column;
+  }
+  /* DOM 顺序为 顶栏→内容→底部导航，桌面端用 order 把导航提到顶部 */
+  .topbar { position: relative; order: 0; }
+  .tabbar {
+    order: 1; position: relative; bottom: auto; left: auto; transform: none;
+    width: 100%; max-width: none; height: var(--nav-h);
+    border-top: none; border-bottom: 1px solid var(--line);
+    justify-content: center; gap: 8px; padding-bottom: 0;
+  }
+  .tabbar button {
+    flex: 0 0 auto; flex-direction: row; gap: 7px;
+    padding: 0 22px; font-size: 13px;
+  }
+  .tabbar button svg { width: 18px; height: 18px; }
+  .scroll {
+    order: 2; flex: 1; max-height: none; overflow-y: auto;
+    width: 100%; max-width: 1160px; margin: 0 auto;
+    padding: 22px clamp(24px, 4vw, 48px) 48px;
+  }
+  /* 内容双列网格 */
+  .view.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  .hero, .note, .segmented, #planWeek, #planWeek .card { grid-column: 1 / -1; }
+  #planDay { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  #view-today .card:nth-child(4) { grid-column: 1 / -1; }
+  #view-moves .card:nth-child(1) { grid-column: 1 / -1; }
+  #view-me .card:nth-child(5) { grid-column: 1 / -1; }
+  /* 弹层改为浮动面板 */
+  .sheet {
+    bottom: 28px; max-width: 560px; border-radius: 20px;
+    transform: translate(-50%, calc(100% + 40px));
+    box-shadow: 0 24px 60px -18px rgba(16, 24, 40, .35);
+  }
+  .sheet.on { transform: translate(-50%, 0); }
+}
