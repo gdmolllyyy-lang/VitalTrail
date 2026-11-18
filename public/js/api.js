@@ -54,6 +54,8 @@
     putDay(date, day) { return this.req('PUT', '/api/logs/' + date, day); },
     putProfile(p) { return this.req('PUT', '/api/profile', p); },
     addWeight(w) { return this.req('POST', '/api/weights', w); },
+    delWeight(date) { return this.req('DELETE', '/api/weights/' + date); },
+    clearWeights() { return this.req('DELETE', '/api/weights'); },
     putPlan(date, plan) { return this.req('PUT', '/api/plans/' + date, plan); },
     putWeek(week) { return this.req('PUT', '/api/week', week); },
     searchFoods(q) { return this.req('GET', '/api/library/foods?q=' + encodeURIComponent(q)); },

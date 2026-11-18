@@ -229,6 +229,14 @@ function addWeight(w) {
     .run(date, Number(w.weight) || 0, bf);
   return getWeights();
 }
+function deleteWeight(date) {
+  db.prepare('DELETE FROM weight_log WHERE date = ?').run(date);
+  return getWeights();
+}
+function clearWeights() {
+  db.prepare('DELETE FROM weight_log').run();
+  return getWeights();
+}
 
 /* ---------------- 计划 ---------------- */
 function getPlan(date) {
@@ -328,7 +336,7 @@ module.exports = {
   db, DB_FILE, MEALS, DEFAULT_PROFILE,
   getProfile, saveProfile,
   getDay, putDay, clearDay,
-  getWeights, addWeight,
+  getWeights, addWeight, deleteWeight, clearWeights,
   getPlan, putPlan, getWeek, putWeek,
   getFoods, getExercises,
   seed, stats

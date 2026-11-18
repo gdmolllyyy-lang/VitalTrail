@@ -77,6 +77,8 @@ Healthy/
 | DELETE | `/api/logs/:date` | 清空某日 |
 | GET | `/api/weights` | 体重/体脂历史 |
 | POST | `/api/weights` | 新增记录（同日覆盖） |
+| DELETE | `/api/weights/2026-01-01` | 删除某一天的记录 |
+| DELETE | `/api/weights` | 清空全部体重/体脂趋势 |
 | GET / PUT | `/api/plans/:date` | 单日食谱（JSON 快照） |
 | GET / PUT | `/api/week` | 一周计划（JSON 快照，按起始日存档） |
 | GET | `/api/library/foods?q=鸡胸` | 食物库检索（SQLite `LIKE`，支持别名） |

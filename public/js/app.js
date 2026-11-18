@@ -713,32 +713,63 @@
     $('#sourceList').innerHTML = SOURCES.map((s) => '<li>· ' + esc(s) + '</li>').join('');
   }
 
+  function renderWeightHistory() {
+    $('#weightHistory').innerHTML = (S.weights || []).slice(-6).reverse().map((w) =>
+      '<div class="item"><div class="item-body"><div class="item-name">' + w.date + '</div><div class="item-sub">' + (w.bf ? '体脂 ' + w.bf + '%' : '—') + '</div></div>' +
+      '<button class="link" data-del-weight="' + w.date + '" style="margin-right:10px;font-size:11px">删除</button>' +
+      '<div class="item-kcal">' + w.weight + ' <small>kg</small></div></div>').join('') || '<div class="empty">暂无历史</div>';
+  }
+
   function weightChartSvg() {
-    const arr = (S.weights || []).slice(-14);
-    if (arr.length < 2) {
+    const all = (S.weights || []);
+    const wArr = all.slice(-14);
+    const bfArr = all.filter((a) => a.bf != null && a.bf !== '').slice(-14);
+    if (wArr.length < 2) {
       return '<div class="empty"><div class="e-ico">📉</div>记录 2 次以上体重即可看到趋势</div>';
     }
-    const ws = arr.map((a) => +a.weight);
-    let min = Math.min.apply(null, ws), max = Math.max.apply(null, ws);
-    if (max - min < 1) { min -= .5; max += .5; }
-    const pad = (max - min) * 0.18;
-    min -= pad; max += pad;
-    const W = 300, H = 96, L = 8, R = 8, T = 12, B = 20;
-    const X = (i) => L + (i * (W - L - R)) / (arr.length - 1);
-    const Y = (v) => T + (1 - (v - min) / (max - min)) * (H - T - B);
-    const pts = arr.map((a, i) => X(i) + ',' + Y(+a.weight)).join(' ');
-    const dots = arr.map((a, i) => '<circle cx="' + X(i) + '" cy="' + Y(+a.weight) + '" r="2.6" fill="#12b886"/>').join('');
-    const last = arr[arr.length - 1];
-    const change = (+last.weight - +arr[0].weight).toFixed(1);
-    return '<svg class="trend" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
-      '<polyline points="' + pts + '" fill="none" stroke="#12b886" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
-      dots +
-      '<text x="' + L + '" y="' + (H - 5) + '" font-size="9" fill="#9aa6b8">' + arr[0].date.slice(5) + ' · ' + arr[0].weight + 'kg</text>' +
+    const W = 300, H = 104, L = 8, R = 8, T = 12, B = 20;
+    // 每条线各自归一化：体重（kg）与体脂率（%）量纲不同，分开取刻度
+    const span = (vals, minGap, padRatio) => {
+      let min = Math.min.apply(null, vals), max = Math.max.apply(null, vals);
+      if (max - min < minGap) { min -= minGap / 2; max += minGap / 2; }
+      const pad = (max - min) * padRatio;
+      return [min - pad, max + pad];
+    };
+    const [wMin, wMax] = span(wArr.map((a) => +a.weight), 1, 0.18);
+    const hasBf = bfArr.length >= 2;
+    const [bMin, bMax] = hasBf ? span(bfArr.map((a) => +a.bf), 0.5, 0.22) : [0, 1];
+    const X = (i, n) => L + (i * (W - L - R)) / (n - 1);
+    const Yw = (v) => T + (1 - (v - wMin) / (wMax - wMin)) * (H - T - B);
+    const Yb = (v) => T + (1 - (v - bMin) / (bMax - bMin)) * (H - T - B);
+
+    const wPts = wArr.map((a, i) => X(i, wArr.length) + ',' + Yw(+a.weight)).join(' ');
+    const wDots = wArr.map((a, i) => '<circle cx="' + X(i, wArr.length) + '" cy="' + Yw(+a.weight) + '" r="2.4" fill="#12b886"/>').join('');
+    const first = wArr[0], last = wArr[wArr.length - 1];
+    const wChange = (+last.weight - +first.weight).toFixed(1);
+
+    let svg = '<svg class="trend" viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none">' +
+      '<polyline points="' + wPts + '" fill="none" stroke="#12b886" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+      wDots;
+    let footer = '<span>共 ' + all.length + ' 条记录</span><span>体重 ' + (wChange > 0 ? '+' : '') + wChange + ' kg</span>';
+    if (hasBf) {
+      const bPts = bfArr.map((a, i) => X(i, bfArr.length) + ',' + Yb(+a.bf)).join(' ');
+      const bDots = bfArr.map((a, i) => '<circle cx="' + X(i, bfArr.length) + '" cy="' + Yb(+a.bf) + '" r="2.4" fill="#339af0"/>').join('');
+      svg += '<polyline points="' + bPts + '" fill="none" stroke="#339af0" stroke-width="2" stroke-dasharray="4 3" stroke-linejoin="round" stroke-linecap="round"/>' + bDots;
+      const bChange = (+bfArr[bfArr.length - 1].bf - +bfArr[0].bf).toFixed(1);
+      footer = '<span>共 ' + all.length + ' 条记录</span><span>体重 ' + (wChange > 0 ? '+' : '') + wChange + ' kg · 体脂 ' + (bChange > 0 ? '+' : '') + bChange + ' %</span>';
+    }
+    svg += '<text x="' + L + '" y="' + (H - 5) + '" font-size="9" fill="#9aa6b8">' + first.date.slice(5) + ' · ' + first.weight + 'kg</text>' +
       '<text x="' + (W - R) + '" y="' + (H - 5) + '" font-size="9" fill="#9aa6b8" text-anchor="end">' + last.date.slice(5) + ' · ' + last.weight + 'kg</text>' +
-      '</svg>' +
-      '<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-top:2px">' +
-      '<span>共 ' + arr.length + ' 条记录</span>' +
-      '<span>变化 ' + (change > 0 ? '+' : '') + change + ' kg</span></div>';
+      '</svg>';
+
+    const legend = '<div style="display:flex;gap:14px;font-size:11px;color:var(--sub);margin-bottom:4px">' +
+      '<span style="display:flex;align-items:center;gap:4px"><i style="width:14px;height:2.5px;background:#12b886;border-radius:1px"></i>体重 kg</span>' +
+      (hasBf
+        ? '<span style="display:flex;align-items:center;gap:4px"><i style="width:14px;height:2.5px;background:#339af0;border-radius:1px"></i>体脂率 %</span>'
+        : '<span>记录 2 次体脂后显示体脂曲线</span>') +
+      '</div>';
+    return legend + svg +
+      '<div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--sub);margin-top:2px">' + footer + '</div>';
   }
 
   /* ---------------- 弹层控制 ---------------- */
@@ -1113,10 +1144,36 @@
     $('#addWeightBtn').addEventListener('click', () => {
       $('#wWeight').value = S.profile.weight;
       $('#wBodyfat').value = S.profile.bodyfat || '';
-      $('#weightHistory').innerHTML = (S.weights || []).slice(-6).reverse().map((w) =>
-        '<div class="item"><div class="item-body"><div class="item-name">' + w.date + '</div><div class="item-sub">' + (w.bf ? '体脂 ' + w.bf + '%' : '—') + '</div></div>' +
-        '<div class="item-kcal">' + w.weight + ' <small>kg</small></div></div>').join('') || '<div class="empty">暂无历史</div>';
+      renderWeightHistory();
       openSheet('sheet-weight');
+    });
+    $('#weightHistory').addEventListener('click', (ev) => {
+      const btn = ev.target.closest('[data-del-weight]');
+      if (!btn) return;
+      const date = btn.dataset.delWeight;
+      S.weights = (S.weights || []).filter((w) => w.date !== date);
+      save();
+      if (window.API && window.API.online) push(() => window.API.delWeight(date));
+      renderWeightHistory();
+      renderAll();
+      toast('已删除 ' + date + ' 的记录');
+    });
+    // 清空趋势（双击确认，防止误触）
+    const clearBtn = $('#clearWeightsBtn');
+    clearBtn.addEventListener('click', () => {
+      if (clearBtn.dataset.armed !== '1') {
+        clearBtn.dataset.armed = '1';
+        clearBtn.textContent = '确认清空？';
+        setTimeout(() => { clearBtn.dataset.armed = ''; clearBtn.textContent = '清空'; }, 3000);
+        return;
+      }
+      clearBtn.dataset.armed = '';
+      clearBtn.textContent = '清空';
+      S.weights = [];
+      save();
+      if (window.API && window.API.online) push(() => window.API.clearWeights());
+      renderAll();
+      toast('趋势数据已清空，重新记录即可');
     });
     $('#confirmWeight').addEventListener('click', () => {
       const w = +$('#wWeight').value;

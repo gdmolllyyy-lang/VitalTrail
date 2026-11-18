@@ -133,6 +133,13 @@ async function route(req, res, url) {
       if (!body.weight) return fail(res, 400, '缺少 weight');
       return send(res, 201, store.addWeight(body));
     }
+    if (method === 'DELETE') {
+      if (seg[1]) {
+        if (!isDate(seg[1])) return fail(res, 400, '日期格式应为 YYYY-MM-DD');
+        return send(res, 200, store.deleteWeight(seg[1]));
+      }
+      return send(res, 200, store.clearWeights());
+    }
     return fail(res, 405, '不支持的方法');
   }
 
